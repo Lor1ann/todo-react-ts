@@ -5,29 +5,34 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export const AddField = (props: {
-  addTask: any;
-  text: string;
-  getText: any;
-  getCheck: any;
-  checked: boolean;
+  onAdd: (text: string, checked: boolean) => void;
 }) => {
+  const [checkAddField, setCheckAddField] = React.useState(false);
+  const [text, setText] = React.useState<string>("");
+
+  const onClickAdd = (text: string, checked: boolean) => {
+    props.onAdd(text, checked);
+    setCheckAddField(false);
+    setText("");
+  };
+
   return (
     <div className="field">
       <Checkbox
-        checked={props.checked}
+        checked={checkAddField}
         className="checkbox"
-        onClick={props.getCheck}
+        onChange={(e: any) => setCheckAddField(e.target.checked)}
         icon={<RadioButtonUncheckedIcon />}
         checkedIcon={<CheckCircleIcon />}
       />
       <TextField
         placeholder="Введите текст задачи..."
-        value={props.text}
-        onChange={props.getText}
+        value={text}
+        onChange={(e: any) => setText(e.target.value)}
         variant="standard"
         fullWidth
       />
-      <Button onClick={() => props.addTask(props.text)}>
+      <Button onClick={() => onClickAdd(text, checkAddField)}>
         <AddIcon />
       </Button>
     </div>

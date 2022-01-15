@@ -4,52 +4,63 @@ import { Paper, Divider, Button, List, Tabs, Tab } from "@mui/material";
 import { AddField } from "./components/AddField";
 import { Item } from "./components/Item";
 
-function App() {
-  type Task = {
-    id: number;
-    text: string;
-    complited: boolean;
-  };
+type Task = {
+  id: number;
+  text: string;
+  complited: boolean;
+};
 
-  function reduser(
+function App() {
+  const [state, dispatch] = React.useReducer(reducer, [] as Array<Task>);
+
+  function reducer(
     state: Array<Task>,
-    action: { type: string; text?: string; complited: boolean }
+    action: {
+      type: string;
+      payload?: any;
+    }
   ) {
     if (action.type === "ADD_TASK") {
       return [
         ...state,
         {
           id: state.length,
-          text: action.text,
-          complited: action.complited,
+          text: action.payload.text,
+          complited: action.payload.complited,
         },
       ] as Array<Task>;
     }
 
+    if (action.type === "DELETE_TASK") {
+      return state.filter((elem) => {
+        if (elem.id !== action.payload.id) {
+          return true;
+        }
+      });
+    }
     return state;
   }
 
-  const [text, setText] = React.useState<string>("");
-  const [checkAddField, setCheckAddField] = React.useState(false);
-
-  function getText(e: any) {
-    setText(e.target.value);
+  function addTask(text: string, complited: boolean) {
+    if (text.trim()) {
+      dispatch({
+        type: "ADD_TASK",
+        payload: { text, complited },
+      });
+    } else {
+      alert("Вы не ввели текст задачи!");
+    }
   }
 
-  function getCheck() {
-    setCheckAddField(!checkAddField);
-  }
+  function deleteTask(id: number) {
+    const solution = window.confirm("Вы точно хотите удалить задачу?");
 
-  const [state, dispatch] = React.useReducer(reduser, [] as Array<Task>);
-
-  function addTask() {
-    dispatch({
-      type: "ADD_TASK",
-      text: text,
-      complited: checkAddField,
-    });
-    setText("");
-    setCheckAddField(false);
+    if (solution) {
+      dispatch({
+        type: "DELETE_TASK",
+        payload: { id },
+      });
+    }
   }
 
   return (
@@ -58,13 +69,7 @@ function App() {
         <Paper className="header" elevation={0}>
           <h4>Список задач</h4>
         </Paper>
-        <AddField
-          checked={checkAddField}
-          addTask={addTask}
-          getText={getText}
-          text={text}
-          getCheck={getCheck}
-        />
+        <AddField onAdd={addTask} />
         <Divider />
         <Tabs value={0}>
           <Tab label="Все" />
@@ -75,7 +80,13 @@ function App() {
         <List>
           {state.map((obj: any) => {
             return (
-              <Item text={obj.text} key={obj.id} checked={obj.complited} />
+              <Item
+                text={obj.text}
+                key={obj.id}
+                id={obj.id}
+                checked={obj.complited}
+                onDelete={deleteTask}
+              />
             );
           })}
         </List>
