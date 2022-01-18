@@ -1,72 +1,21 @@
 import "./App.css";
-import React from "react";
 import { Paper, Divider, Button, List, Tabs, Tab } from "@mui/material";
 import { AddField } from "./components/AddField";
 import { Item } from "./components/Item";
+import { useSelector, useDispatch } from "react-redux";
 
-type Task = {
+type Tasks = {
   id: number;
   text: string;
   completed: boolean;
 };
 
-type Actions =
-  | { type: "ADD_TASK"; payload: { text: string; completed: boolean } }
-  | { type: "DELETE_TASK"; payload: { id: number } }
-  | { type: "DELETE_ALL" }
-  | { type: "TOGGLE_CHECKBOX"; payload: { id: number } }
-  | { type: "TOGGLE_CHECK_ALL" };
+type State = { filterBy: any; tasks: Tasks[] };
 
-type State = Array<Task>;
-
-function reducer(state: State, action: Actions) {
-  if (action.type === "ADD_TASK") {
-    return [
-      ...state,
-      {
-        id: state.length,
-        text: action.payload.text,
-        completed: action.payload.completed,
-      },
-    ] as Array<Task>;
-  }
-
-  if (action.type === "DELETE_TASK") {
-    return state.filter((elem) => {
-      if (elem.id !== action.payload.id) {
-        return true;
-      }
-    });
-  }
-
-  if (action.type === "DELETE_ALL") {
-    return [];
-  }
-
-  if (action.type === "TOGGLE_CHECKBOX") {
-    return state.map((obj) => {
-      if (action.payload.id === obj.id) {
-        return {
-          ...obj,
-          completed: !obj.completed,
-        };
-      }
-      return obj;
-    });
-  }
-
-  if (action.type === "TOGGLE_CHECK_ALL") {
-    const notCompleted = state.find((obj) => !obj.completed);
-    return state.map((obj) => ({
-      ...obj,
-      completed: Boolean(notCompleted),
-    }));
-  }
-  return state;
-}
-
+const filterIndex = { all: 0, active: 1, completed: 2 } as any;
 function App() {
-  const [state, dispatch] = React.useReducer(reducer, [] as Array<Task>);
+  const dispatch = useDispatch();
+  const state = useSelector((state: State) => state);
 
   function addTask(text: string, completed: boolean) {
     if (text.trim()) {
@@ -113,6 +62,14 @@ function App() {
     });
   }
 
+  function setFilter(_: any, newIndex: number) {
+    const status = Object.keys(filterIndex)[newIndex];
+    dispatch({
+      type: "SET_FILTER",
+      payload: { status },
+    });
+  }
+
   return (
     <div className="App">
       <Paper className="wrapper">
@@ -121,30 +78,46 @@ function App() {
         </Paper>
         <AddField onAdd={addTask} />
         <Divider />
-        <Tabs value={0}>
+        <Tabs onChange={setFilter} value={filterIndex[state.filterBy]}>
           <Tab label="Все" />
           <Tab label="Активные" />
           <Tab label="Завершённые" />
         </Tabs>
         <Divider />
         <List>
-          {state.map((obj: any) => {
-            return (
-              <Item
-                text={obj.text}
-                key={obj.id}
-                id={obj.id}
-                checked={obj.completed}
-                onDelete={deleteTask}
-                onCheck={toggleCheckbox}
-              />
-            );
-          })}
+          {state.tasks
+            .filter((obj) => {
+              if (state.filterBy === "all") {
+                return true;
+              }
+              if (state.filterBy === "completed") {
+                return obj.completed;
+              }
+              if (state.filterBy === "active") {
+                return !obj.completed;
+              }
+            })
+            .map((obj: any) => {
+              return (
+                <Item
+                  text={obj.text}
+                  key={obj.id}
+                  id={obj.id}
+                  checked={obj.completed}
+                  onDelete={deleteTask}
+                  onCheck={toggleCheckbox}
+                />
+              );
+            })}
         </List>
         <Divider />
         <div className="check-buttons">
-          <Button onClick={checkAllTasks}>Отметить всё</Button>
-          <Button onClick={deleteAllTasks}>Очистить</Button>
+          <Button disabled={state.tasks.length === 0} onClick={checkAllTasks}>
+            Отметить всё
+          </Button>
+          <Button disabled={state.tasks.length === 0} onClick={deleteAllTasks}>
+            Очистить
+          </Button>
         </div>
       </Paper>
     </div>
