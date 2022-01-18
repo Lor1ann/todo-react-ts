@@ -12,6 +12,7 @@ type Props = {
   onDelete: any;
   id: number;
   onCheck: any;
+  onEdit: any;
 };
 
 export const Item: React.FC<Props> = (props) => {
@@ -26,7 +27,7 @@ export const Item: React.FC<Props> = (props) => {
         />
         <Typography className="item-text">{props.text}</Typography>
         <div className="item-buttons d-flex">
-          <IconButton>
+          <IconButton onClick={() => props.onEdit(props.text, props.id)}>
             <EditIcon style={{ fontSize: 20 }} />
           </IconButton>
           <IconButton onClick={() => props.onDelete(props.id)}>

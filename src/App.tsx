@@ -70,6 +70,13 @@ function App() {
     });
   }
 
+  function editText(text: string, id: number) {
+    dispatch({
+      type: "EDIT_TEXT",
+      payload: { text, id },
+    });
+  }
+
   return (
     <div className="App">
       <Paper className="wrapper">
@@ -106,6 +113,7 @@ function App() {
                   checked={obj.completed}
                   onDelete={deleteTask}
                   onCheck={toggleCheckbox}
+                  onEdit={editText}
                 />
               );
             })}

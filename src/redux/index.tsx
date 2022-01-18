@@ -12,7 +12,8 @@ type Actions =
   | { type: "DELETE_ALL" }
   | { type: "TOGGLE_CHECKBOX"; payload: { id: number } }
   | { type: "TOGGLE_CHECK_ALL" }
-  | { type: "SET_FILTER"; payload: { status: number } };
+  | { type: "SET_FILTER"; payload: { status: number } }
+  | { type: "EDIT_TEXT"; payload: { text: string; id: string } };
 
 const store = createStore(reducer, { filterBy: "all", tasks: [] });
 
@@ -78,6 +79,17 @@ function reducer(state: any, action: Actions) {
     return { ...state, filterBy: action.payload.status };
   }
 
+  if (action.type === "EDIT_TEXT") {
+    return {
+      ...state,
+      tasks: state.tasks.map((obj: any) => {
+        if (obj.id === action.payload.id) {
+          return { ...obj, text: window.prompt("", action.payload.text) };
+        }
+        return obj;
+      }),
+    };
+  }
   return state;
 }
 
