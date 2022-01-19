@@ -1,8 +1,9 @@
 import "./App.css";
-import { Paper, Divider, Button, List, Tabs, Tab } from "@mui/material";
+import { Paper, Divider, Button, List } from "@mui/material";
 import { AddField } from "./components/AddField";
 import { Item } from "./components/Item";
 import { useSelector, useDispatch } from "react-redux";
+import Filter from "./components/Filter";
 
 type Tasks = {
   id: number;
@@ -10,13 +11,12 @@ type Tasks = {
   completed: boolean;
 };
 
-type State = { filterBy: any; tasks: Tasks[] };
+type State = { filter: { filterBy: string }; tasks: Tasks[] };
 
-const filterIndex = { all: 0, active: 1, completed: 2 } as any;
 function App() {
   const dispatch = useDispatch();
   const state = useSelector((state: State) => state);
-
+  console.log(state);
   function addTask(text: string, completed: boolean) {
     if (text.trim()) {
       dispatch({
@@ -62,14 +62,6 @@ function App() {
     });
   }
 
-  function setFilter(_: any, newIndex: number) {
-    const status = Object.keys(filterIndex)[newIndex];
-    dispatch({
-      type: "SET_FILTER",
-      payload: { status },
-    });
-  }
-
   function editText(text: string, id: number) {
     dispatch({
       type: "EDIT_TEXT",
@@ -85,22 +77,18 @@ function App() {
         </Paper>
         <AddField onAdd={addTask} />
         <Divider />
-        <Tabs onChange={setFilter} value={filterIndex[state.filterBy]}>
-          <Tab label="Все" />
-          <Tab label="Активные" />
-          <Tab label="Завершённые" />
-        </Tabs>
+        <Filter />
         <Divider />
         <List>
           {state.tasks
             .filter((obj) => {
-              if (state.filterBy === "all") {
+              if (state.filter.filterBy === "all") {
                 return true;
               }
-              if (state.filterBy === "completed") {
+              if (state.filter.filterBy === "completed") {
                 return obj.completed;
               }
-              if (state.filterBy === "active") {
+              if (state.filter.filterBy === "active") {
                 return !obj.completed;
               }
             })
