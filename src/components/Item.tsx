@@ -25,7 +25,16 @@ export const Item: React.FC<Props> = (props) => {
           icon={<RadioButtonUncheckedIcon />}
           checkedIcon={<CheckCircleIcon />}
         />
-        <Typography className="item-text">{props.text}</Typography>
+        {!props.checked ? (
+          <Typography className="item-text">{props.text}</Typography>
+        ) : (
+          <Typography
+            className="item-text"
+            style={{ textDecoration: "line-through" }}
+          >
+            {props.text}
+          </Typography>
+        )}
         <div className="item-buttons d-flex">
           <IconButton onClick={() => props.onEdit(props.text, props.id)}>
             <EditIcon style={{ fontSize: 20 }} />
