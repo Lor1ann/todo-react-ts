@@ -1,3 +1,4 @@
+Deployed on Vercel: https://todo-react-ts-three.vercel.app/
 
 React toDo-list
 
